@@ -1,9 +1,10 @@
-import { Box, Button, chakra, Input, StatHelpText } from "@chakra-ui/react";
+import { Box, Button, chakra, Spinner, Input, StatHelpText } from "@chakra-ui/react";
 import axios from "axios";
+import dayjs from 'dayjs'
 import React, { useEffect, useState } from 'react'
 import { SERVER_ENDPOINTS } from "../../config"
-import { Spinner } from "@chakra-ui/react"
 import { useMatch } from "react-router-dom";
+import groupByDay from "../../utils/dateGrouping";
 
 interface analyticsState {
     error: string | null,
@@ -20,18 +21,23 @@ function UrlShortenerForm() {
 
     const match = useMatch("/analytics/:id")
     const urlId = match?.params.id
-    console.log(urlId)
     useEffect(() => {
         async function getData() {
             const result = await axios.get(`${SERVER_ENDPOINTS}/api/analytics/${urlId}`)
                 .then((response) => response.data)
-            setState(o => ({ ...o, response: result }))
+            setState(o => ({ ...o, data: result }))
             console.log(result)
         }
         getData()
     }, [])
+    if (state?.data) {
+        const q = groupByDay(state.data.map(x => x.createdAt))
+        console.log(JSON.stringify(q))
+    }
+
 
     return !state.data ? <Spinner width={20} height={20} /> :
-        < div > {JSON.stringify(state.data)}</div >
+        < div >
+        </div >
 }
 export default UrlShortenerForm;

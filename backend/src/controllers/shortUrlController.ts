@@ -21,12 +21,11 @@ export async function handleRedirect(request: Request, response: Response) {
   }
 
   analytics.create({ shortUrlId: short._id });
-
   return response.redirect(short.destination);
 }
 
 export async function getAnalytics(request: Request, response: Response) {
-  const id = request.url.split("/").at(-1);
+  const id = request.params.shortUrlId;
   const data = await analytics.find({ shortUrlId: id }).lean();
   if (data) return response.send(data);
   return response.sendStatus(404);
