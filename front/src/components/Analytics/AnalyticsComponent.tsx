@@ -1,22 +1,14 @@
 import { Box, Button, chakra, Spinner, Input, StatHelpText, ScaleFade } from "@chakra-ui/react";
 import axios from "axios";
-import dayjs from 'dayjs'
 import React, { useEffect, useState } from 'react'
 import { SERVER_ENDPOINTS } from "../../config"
 import { useMatch } from "react-router-dom";
 import groupByDay from "../../utils/dateGrouping";
 import { Line } from 'react-chartjs-2'
-import { Chart as Chartjs, registerables } from 'chart.js';
-Chartjs.register(...registerables);
-interface analyticsState {
-    error: string | null,
-    data?: shortUrlAnalytics[]
-}
-
-interface shortUrlAnalytics {
-    createdAt: Date
-}
-
+import 'chartjs-adapter-date-fns';
+import { Chart, registerables } from 'chart.js';
+import { analyticsState } from "./AnalyticsComponent.types";
+Chart.register(...registerables);
 
 function UrlShortenerForm() {
 
@@ -31,7 +23,8 @@ function UrlShortenerForm() {
             setState(o => ({ ...o, data: result }))
         }
         getData()
-    }, [])
+    }, [urlId])
+
     let q: _.Dictionary<Date[]>;
     let aggregations: { label: string, count: number }[] = []
     if (state?.data) {
@@ -54,7 +47,7 @@ function UrlShortenerForm() {
         labels,
         datasets: [
             {
-                label: 'Dataset 1',
+                label: `Url clicks count`,
                 data: aggregations.map(a => a.count),
                 borderColor: 'rgb(255, 99, 132)',
                 backgroundColor: 'rgba(255, 99, 132, 0.5)',
@@ -63,30 +56,40 @@ function UrlShortenerForm() {
     };
 
     return !state.data ? <Spinner width={20} height={20} /> :
-        < div >
+        < div style={{ height: "300px", width: "450px", position: "relative", marginBottom: "1%", padding: "1%" }} >
             <Line
                 data={data}
                 options={{
+                    maintainAspectRatio: false,
                     scales: {
                         x: {
                             type: 'time',
+                            title: {
+                                text: 'Day',
+                                display: true,
+                            },
                             axis: 'x',
-                            // time: {
-                            //     unit: "hour",
-                            //     stepSize: 1000,
-                            //     displayFormats: {
-                            //         millisecond: 'MMM DD',
-                            //         second: 'MMM DD',
-                            //         minute: 'MMM DD',
-                            //         hour: 'MMM DD',
-                            //         day: 'MMM DD',
-                            //         week: 'MMM DD',
-                            //         month: 'MMM DD',
-                            //         quarter: 'MMM DD',
-                            //         year: 'MMM DD',
-                            //     }
-                            // }
-
+                            time: {
+                                unit: "day",
+                                stepSize: 1,
+                                displayFormats: {
+                                    second: 'MMM dd',
+                                    minute: 'MMM dd',
+                                    hour: 'MMM dd',
+                                    day: 'MMM dd',
+                                }
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            title: {
+                                text: 'Redirects',
+                                display: true,
+                            },
+                            axis: 'y',
+                            ticks: {
+                                precision: 0
+                            }
                         }
 
                     }

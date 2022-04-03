@@ -1,9 +1,8 @@
-import dayjs from "dayjs";
 import _ from "lodash";
 
 const groupByDay = (elements: Date[]): _.Dictionary<Date[]> => {
   return _.groupBy(elements, (el) => {
-    return dayjs(el.toString().substring(0, 19));
+    return new Date(el.toString().substring(0, 10));
   });
 };
 export default groupByDay;

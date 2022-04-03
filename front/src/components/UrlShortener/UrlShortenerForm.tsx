@@ -1,8 +1,10 @@
 import { Box, Button, Input } from "@chakra-ui/react";
 import axios from "axios";
 import React, { useState } from 'react'
+import { Link } from "react-router-dom";
 import { SERVER_ENDPOINTS } from "../../config"
-import { FormStyled } from "./UrlShortenerForm.styled";
+import { isValidHttpUrl } from "../../utils/Validation";
+import { AllCenteredContainer, CenteredContainer, ErrorContainer, FormStyled } from "./UrlShortenerForm.styled";
 import { UrlShortenerFormState } from "./urlShortenerForm.types";
 
 function UrlShortenerForm() {
@@ -11,27 +13,43 @@ function UrlShortenerForm() {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const destination = state.destination;
-        const result = await axios.post(`${SERVER_ENDPOINTS}/api/url`, { destination })
-            .then((response) => response.data)
-        setState(o => ({ ...o, response: result }))
-        console.log(result)
+
+        if (!isValidHttpUrl(state.destination)) {
+            setState(o => ({ ...o, errorMessage: "Input should be a valid URL" }))
+            return;
+        }
+        try {
+            const result = await axios.post(`${SERVER_ENDPOINTS}/api/url`, { destination })
+            setState(o => ({ ...o, response: result.data, errorMessage: null }))
+        }
+        catch (error: any) {
+            // todo: more user-friendly?
+            setState(o => ({ ...o, errorMessage: "Something wrong happened while sending request. Please, try again later" }))
+        }
     }
 
-    return <><Box pos="relative">
-        <FormStyled onSubmit={handleSubmit}>
-            <Input onChange={(e: any) => { setState(o => ({ ...o, destination: e.target.value })) }} />
-            <Button type="submit">Create</Button>
-        </FormStyled>
-    </Box>
-        {(state.response) &&
-            <>
+    const analyticsAddress = `/analytics/${state.response && state.response._id}`
+    const shortenedLinkAddress = `${SERVER_ENDPOINTS}/${state?.response?.shortId}`
+    return <>
+        {state.response ?
+            <AllCenteredContainer>
                 <h3>Saved successfully</h3>
-                <div>Shortened url</div>
-                <a href={SERVER_ENDPOINTS + '/' + state.response.shortId}>{SERVER_ENDPOINTS + '/' + state.response.shortId}</a>
-                <div>Analytics page</div>
-                {/* // link to???????????????????\ */}
-                <a href={SERVER_ENDPOINTS + '/' + state.response._id}></a>
-            </>
+                <div>Shortened link</div>
+                <a href={shortenedLinkAddress}>{shortenedLinkAddress}</a>
+                <Link to={analyticsAddress} >Analytics page</Link>
+            </AllCenteredContainer> :
+            <Box>
+                <FormStyled onSubmit={handleSubmit}>
+                    <Input onChange={(e: any) => { setState(o => ({ ...o, destination: e.target.value })) }} />
+                    {state.errorMessage &&
+                        <ErrorContainer>
+                            {state.errorMessage}
+                        </ErrorContainer>}
+                    <CenteredContainer>
+                        <Button type="submit">Create</Button>
+                    </CenteredContainer>
+                </FormStyled>
+            </Box>
         }
     </>
 }
