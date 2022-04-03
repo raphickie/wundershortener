@@ -1,7 +1,6 @@
-import { css } from "@emotion/react"
 import styled from "@emotion/styled"
 
-const Justified = styled.div`
+export const Justified = styled.div`
 display: flex;
 justify-content: center;
 `
@@ -22,10 +21,8 @@ button {
     }
 `
 
-export const AllCenteredContainer = styled.div`
-display: flex;
+export const AllCenteredContainer = styled(Justified)`
 flex-direction: column;
-justify-content: center;
 div,h3,a {
     display: flex;
     justify-content: center;

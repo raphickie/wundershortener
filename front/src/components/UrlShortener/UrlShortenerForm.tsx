@@ -1,9 +1,8 @@
-import { Box, Button, Input } from "@chakra-ui/react";
 import axios from "axios";
 import React, { useState } from 'react'
 import { Link } from "react-router-dom";
 import { SERVER_ENDPOINTS } from "../../config"
-import { isValidHttpUrl } from "../../utils/Validation";
+import { isValidHttpUrl } from "../../utils/validation";
 import { AllCenteredContainer, CenteredContainer, ErrorContainer, FormStyled } from "./UrlShortenerForm.styled";
 import { UrlShortenerFormState } from "./urlShortenerForm.types";
 
@@ -23,7 +22,7 @@ function UrlShortenerForm() {
             setState(o => ({ ...o, response: result.data, errorMessage: null }))
         }
         catch (error: any) {
-            // todo: more user-friendly?
+            // todo: more user-friendly
             setState(o => ({ ...o, errorMessage: "Something wrong happened while sending request. Please, try again later" }))
         }
     }
@@ -38,18 +37,16 @@ function UrlShortenerForm() {
                 <a href={shortenedLinkAddress}>{shortenedLinkAddress}</a>
                 <Link to={analyticsAddress} >Analytics page</Link>
             </AllCenteredContainer> :
-            <Box>
-                <FormStyled onSubmit={handleSubmit}>
-                    <Input onChange={(e: any) => { setState(o => ({ ...o, destination: e.target.value })) }} />
-                    {state.errorMessage &&
-                        <ErrorContainer>
-                            {state.errorMessage}
-                        </ErrorContainer>}
-                    <CenteredContainer>
-                        <Button type="submit">Create</Button>
-                    </CenteredContainer>
-                </FormStyled>
-            </Box>
+            <FormStyled onSubmit={handleSubmit}>
+                <input onChange={(e: any) => { setState(o => ({ ...o, destination: e.target.value })) }} />
+                {state.errorMessage &&
+                    <ErrorContainer>
+                        {state.errorMessage}
+                    </ErrorContainer>}
+                <CenteredContainer>
+                    <button type="submit">Create</button>
+                </CenteredContainer>
+            </FormStyled>
         }
     </>
 }
